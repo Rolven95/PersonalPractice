@@ -8,18 +8,23 @@ import java.util.concurrent.*;
 public class DoubleColor {
 
     public static void main(String[] args) {
-        long totalPossible = new BigDecimal(33).pow(6).multiply(new BigDecimal(16)).longValue();
-        ExecutorService executorService = new ThreadPoolExecutor(10, 10, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+        long TOTAL_POSS = new BigDecimal(33).pow(6).multiply(new BigDecimal(16)).longValue();
+//        final long TOTAL_POSS = 103;
+        final int SECTION_SIZE = 10000;
 
+        final ExecutorService executorService = new ThreadPoolExecutor(10, 10, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         final ConcurrentHashMap<Integer, Integer> result = new ConcurrentHashMap<>();
-        CountDownLatch countDownLatch = new CountDownLatch(100);
-        for (int t = 0; t < 100; t++) {
+
+        final CountDownLatch countDownLatch = new CountDownLatch(SECTION_SIZE);
+
+
+        for (int t = 0; t < SECTION_SIZE; t++) {
             int finalT = t;
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    int offset = (int) (totalPossible / 100L * (finalT + 1));
-                    int max = (int) (totalPossible / 100L);
+                    int offset = (int) (TOTAL_POSS / 10000L * (finalT + 1));
+                    int max = (int) (TOTAL_POSS / 10000L);
                     System.out.println("Thread Started. t = " + finalT);
 
                     LinkedList<Integer> allList = new LinkedList<>();
@@ -31,11 +36,14 @@ public class DoubleColor {
                     int size = max;
                     while (size > 2) {
                         allList.remove(RandomUtils.nextInt(0, size));
+                        size--;
                     }
                     System.out.println("List filtered. t = " + finalT);
 
                     for (Integer integer : allList) {
-                        result.put(integer, null);
+                        result.put(integer + offset, 0);
+//                        System.out.println("offSet:" + integer + offset);
+//                        System.out.println("Result Added:" + integer + offset);
                     }
                     System.out.println("All map added. t = " + finalT);
                     countDownLatch.countDown();
@@ -47,6 +55,7 @@ public class DoubleColor {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("All job done!");
         for (Integer integer : result.keySet())
             System.out.println(integer);
     }
