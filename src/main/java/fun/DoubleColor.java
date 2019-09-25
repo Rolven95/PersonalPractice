@@ -1,6 +1,7 @@
 package fun;
 
 import Common.TimeRecorder;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,8 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DoubleColor {
-    final static long TOTAL = 32L * 32L * 32L * 32L * 32L * 32L;
-//    final static long TOTAL = 32L * 32L * 32L * 32L * 32L * 32L * 15L;
+//    final static long TOTAL = 32L * 32L * 32L * 32L * 32L;
+    final static long TOTAL = 32L * 32L * 32L * 32L * 32L * 32L * 15L;
 
     final static int WORKER = 10;
     static ExecutorService POOL = Executors.newFixedThreadPool(WORKER);
@@ -59,6 +60,8 @@ public class DoubleColor {
             int end = (finalT + 1) * subPart;
             POOL.execute(() -> {
                 List<Long> sub = new ArrayList<>(init3.subList(start, end));
+                System.out.println("Sub list size:" + sub.size());
+
                 while (sub.size() >= 100)
                     sub = filter(sub);
                 System.out.println("1/100 cut done! Thread:" + finalT);
@@ -105,7 +108,7 @@ public class DoubleColor {
 
     private static int getRandomDigit() {
         String timeStamp = String.valueOf(System.currentTimeMillis());
-        char lastDigit = timeStamp.charAt(timeStamp.length() - 1);
-        return (int) lastDigit;
+        int r = NumberUtils.toInt(timeStamp.substring(timeStamp.length()-1));
+        return r;
     }
 }
