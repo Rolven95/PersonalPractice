@@ -10,29 +10,32 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DoubleColor {
-//    final static long TOTAL = 32L * 32L * 32L * 32L * 32L;
+    //        final static long TOTAL = 32L * 32L * 32L * 32L * 32L;
+//    final static long TOTAL = 32L * 32L * 32L * 32L * 32L * 32L * 15L;
     final static long TOTAL = 32L * 32L * 32L * 32L * 32L * 32L * 15L;
 
     final static int WORKER = 10;
-    static ExecutorService POOL = Executors.newFixedThreadPool(WORKER);
+    final static int INIT_WORKER = 1000000;
+    static ExecutorService POOL = Executors.newFixedThreadPool(15);
 
     public static void main(String[] args) {
         TimeRecorder time = new TimeRecorder("Double Color");
 
         final ConcurrentHashMap<Long, Integer> init2 = new ConcurrentHashMap<>();
 
-        CountDownLatch latch = new CountDownLatch(WORKER);
-        long part = TOTAL / WORKER;
-        for (int t = 0; t < WORKER; t++) {
+        CountDownLatch latch = new CountDownLatch(INIT_WORKER);
+        long part = TOTAL / INIT_WORKER;
+        for (int t = 0; t < INIT_WORKER; t++) {
             int finalT = t;
             Random r = new Random(System.currentTimeMillis() + finalT);
             POOL.execute(() -> {
                 long start = finalT * part;
                 long end = (finalT + 1) * part;
                 for (long i = start; i < end; i++) {
-                    int filter = r.nextInt(10);
-                    if (filter == getRandomDigit())
-                        init2.put(i, 0);
+                    int filter = r.nextInt(1000);
+                    if (filter != getRandomDigit() * getRandomDigit() * getRandomDigit() * getRandomDigit() * getRandomDigit())
+                        continue;
+                    init2.put(i, 0);
                 }
                 latch.countDown();
                 System.out.println("Thread Done, No." + finalT);
@@ -62,7 +65,7 @@ public class DoubleColor {
                 List<Long> sub = new ArrayList<>(init3.subList(start, end));
                 System.out.println("Sub list size:" + sub.size());
 
-                while (sub.size() >= 100)
+                while (sub.size() >= 10000)
                     sub = filter(sub);
                 System.out.println("1/100 cut done! Thread:" + finalT);
 
@@ -76,6 +79,7 @@ public class DoubleColor {
                 latch2.countDown();
             });
         }
+        init2.clear();
 
         try {
             latch2.await();
@@ -96,19 +100,19 @@ public class DoubleColor {
             if (rand.nextInt(10) == getRandomDigit())
                 r.add(num);
         }
+        src.clear();
         return r;
     }
 
     private static void cutList(LinkedList<Long> scr) {
         if (scr.size() <= 1)
             return;
-        Random rand = new Random(System.currentTimeMillis());
+        Random rand = new Random();
         scr.remove(rand.nextInt(scr.size()));
     }
 
     private static int getRandomDigit() {
-        String timeStamp = String.valueOf(System.currentTimeMillis());
-        int r = NumberUtils.toInt(timeStamp.substring(timeStamp.length()-1));
-        return r;
+        Random r = new Random();
+        return r.nextInt(10);
     }
 }
