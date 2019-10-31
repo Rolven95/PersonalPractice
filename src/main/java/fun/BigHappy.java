@@ -3,30 +3,16 @@ package fun;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Pick five numbers from 1-35,
  * pick another two numbers from 1-12
  */
 public class BigHappy {
-    @Data
-    @AllArgsConstructor
-    private class Pick {
-        private List<Integer> first;
-        private List<Integer> second;
-
-        @Override
-        public String toString() {
-            return "First:" + first + ", Second:" + second;
-        }
-    }
-
     public static void main(String[] args) {
         BigHappy bigHappy = new BigHappy();
-        String pick = bigHappy.getPick(7, 3, 1234L, 500);
+        String pick = bigHappy.getPick(6, 3, null, 8888);
         System.out.println(pick);
     }
 
@@ -96,6 +82,9 @@ public class BigHappy {
     private static void cutList(LinkedList<?> scr, Long seed) {
         if (scr.size() <= 1)
             return;
+
+        Collections.shuffle(scr);
+
         Random rand;
         if (seed == null)
             rand = new Random();
@@ -103,5 +92,38 @@ public class BigHappy {
             rand = new Random(seed);
         scr.remove(rand.nextInt(scr.size()));
 
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class Pick {
+        private List<Integer> first;
+        private List<Integer> second;
+
+        @Override
+        public String toString() {
+            first.sort(new Sorter<>());
+            second.sort(new Sorter<>());
+            return "First:" + first + ", Second:" + second;
+        }
+    }
+
+    private class Sorter<T> implements Comparator<T> {
+
+        @Override
+        public int compare(T i1, T i2) {
+            if (i1 == null || i2 == null)
+                return -1;
+
+            int o1 = (Integer)i1;
+            int o2 = (Integer) i2;
+
+            if (o1 == o2)
+                return 0;
+            else if (o1 < o2)
+                return -1;
+            else
+                return 1;
+        }
     }
 }
