@@ -1,22 +1,26 @@
 package fun;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DoubleColor2 {
-    final static int COUNT = 20;
+    final static int PICK_POOL = 10000;
 
     public static void main(String[] args) {
         DoubleColor2 doubleColor2 = new DoubleColor2();
-        for (int i = 0; i < COUNT; i++) {
-            System.out.println(doubleColor2.getRandomSet());
+        List<List<Integer>> pickPool = new LinkedList<>();
+        for(int i = 0; i < PICK_POOL ; i ++){
+            pickPool.add(doubleColor2.getRandomSet());
         }
+        while (pickPool.size()>1)
+            cutList(pickPool);
+
+        System.out.println(pickPool.get(0));
     }
 
     public List<Integer> getRandomSet() {
         List<Integer> toReturn = new ArrayList<>(7);
         toReturn.addAll(getReds());
-
-
 
         toReturn.addAll(getBlue());
 
@@ -30,18 +34,21 @@ public class DoubleColor2 {
     }
 
     private List<Integer> getReds() {
-        ArrayList<Integer> reds = new ArrayList<>(6);
+        HashSet<Integer> reds = new HashSet<>(6);
         for (int i = 0; i < 6; i++) {
             reds.add(getNumber(1, 33).get(0));
         }
-        reds.sort((o1, o2) -> {
+
+        if (reds.size() != 6)
+            return getReds();
+
+        return reds.stream().sorted((o1, o2) -> {
             if (o1.equals(o2))
                 return 0;
             if (o1 < o2)
                 return -1;
             return 1;
-        });
-        return reds;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -70,7 +77,7 @@ public class DoubleColor2 {
     /**
      * randomly remove a element in the list
      */
-    private static void cutList(List<Integer> scr) {
+    public static void cutList(List<?> scr) {
         if (scr.size() <= 1)
             return;
         Collections.shuffle(scr);

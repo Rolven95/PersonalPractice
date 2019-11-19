@@ -1,7 +1,5 @@
 package fun;
 
-import Common.TimeRecorder;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,26 +12,26 @@ public class DoubleColor {
 //    final static long TOTAL = 32L * 32L * 32L * 32L * 32L * 32L * 15L;
     final static long TOTAL = 32L * 32L * 32L * 32L * 32L * 32L * 15L;
 
-    final static int WORKER = 10;
-    final static int INIT_WORKER = 1000000;
-    static ExecutorService POOL = Executors.newFixedThreadPool(15);
+    final static int WORKER = 20;
+    final static int SUB_TASK_SIZE = 10000;
+    final static int PICK = 10;
+    static ExecutorService POOL = Executors.newFixedThreadPool(WORKER);
 
     public static void main(String[] args) {
-        TimeRecorder time = new TimeRecorder("Double Color");
 
         final ConcurrentHashMap<Long, Integer> init2 = new ConcurrentHashMap<>();
 
-        CountDownLatch latch = new CountDownLatch(INIT_WORKER);
-        long part = TOTAL / INIT_WORKER;
-        for (int t = 0; t < INIT_WORKER; t++) {
+        CountDownLatch latch = new CountDownLatch(SUB_TASK_SIZE);
+        long part = TOTAL / SUB_TASK_SIZE;
+        for (int t = 0; t < SUB_TASK_SIZE; t++) {
             int finalT = t;
-            Random r = new Random(System.currentTimeMillis() + finalT);
+            Random r = new Random();
             POOL.execute(() -> {
                 long start = finalT * part;
                 long end = (finalT + 1) * part;
                 for (long i = start; i < end; i++) {
-                    int filter = r.nextInt(1000);
-                    if (filter != getRandomDigit() * getRandomDigit() * getRandomDigit() * getRandomDigit() * getRandomDigit())
+                    int filter = r.nextInt(10000);
+                    if (filter != getRandomDigit() * getRandomDigit() * getRandomDigit() * getRandomDigit())
                         continue;
                     init2.put(i, 0);
                 }
@@ -48,16 +46,14 @@ public class DoubleColor {
         }
         System.out.println("Now have size :" + init2.size());
 
-        time.record("init");
-        System.out.println(time.onTaskEndAndReturnReport());
         ArrayList<Long> init3 = new ArrayList<>(init2.size());
         init3.addAll(init2.keySet());
         init2.clear();
 
 
-        CountDownLatch latch2 = new CountDownLatch(WORKER);
-        int subPart = init3.size() / WORKER;
-        for (int t = 0; t < WORKER; t++) {
+        CountDownLatch latch2 = new CountDownLatch(PICK);
+        int subPart = init3.size() / PICK;
+        for (int t = 0; t < PICK; t++) {
             int finalT = t;
             int start = finalT * subPart;
             int end = (finalT + 1) * subPart;
@@ -87,8 +83,6 @@ public class DoubleColor {
             e.printStackTrace();
         }
 
-        System.out.println(time.onTaskEndAndReturnReport());
-
     }
 
     private static List<Long> filter(List<Long> src) {
@@ -115,4 +109,6 @@ public class DoubleColor {
         Random r = new Random();
         return r.nextInt(10);
     }
+
+
 }

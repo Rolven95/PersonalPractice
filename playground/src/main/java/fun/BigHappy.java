@@ -12,7 +12,7 @@ import java.util.*;
 public class BigHappy {
     public static void main(String[] args) {
         BigHappy bigHappy = new BigHappy();
-        String pick = bigHappy.getPick(6, 3, null, 8888);
+        String pick = bigHappy.getPick(5, 2, null, 1234);
         System.out.println(pick);
     }
 
