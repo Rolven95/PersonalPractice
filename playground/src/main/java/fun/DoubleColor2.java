@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class DoubleColor2 {
-    final static int PICK_POOL = 10000;
+    final static int PICK_POOL = 768;
 
     public static void main(String[] args) {
         DoubleColor2 doubleColor2 = new DoubleColor2();
